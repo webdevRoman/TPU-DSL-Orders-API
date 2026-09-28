@@ -37,8 +37,8 @@ spring:
       jakarta.persistence.validation.mode: none
 
 springdoc:
-#  api-docs: # TODO remove?
-#    enabled: true
+  #  api-docs: # TODO remove?
+  #    enabled: true
   swagger-ui:
     enabled: true
     tags-sorter: alpha
