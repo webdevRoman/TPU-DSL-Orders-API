@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2026-09-27_23-55-15_init-schema
+      author: Grabelnikov R.M.
+      comment: Create order table
+      changes:
+        - createTable:
+            tableName: order
+            remarks: Order
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  remarks: ID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: integer
+                  remarks: Version
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  remarks: Creation datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  remarks: Last update datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: processed_at
+                  type: timestamp with time zone
+                  remarks: Processing completion datetime
+              - column:
+                  name: status
+                  type: text
+                  remarks: Status
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: numeric(10, 2)
+                  remarks: Amount
+                  constraints:
+                    nullable: false
+              - column:
+                  name: items_count
+                  type: integer
+                  remarks: Items count
+                  constraints:
+                    nullable: false
