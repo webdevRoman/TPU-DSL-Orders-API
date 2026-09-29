@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
   servlet:
     context-path: /api/orders-api
 
@@ -15,7 +15,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/orders_db
+    url: jdbc:postgresql://localhost:5433/orders_db
     username: postgres
     password: postgres
     hikari:
@@ -36,9 +36,26 @@ spring:
         query.fail_on_pagination_over_collection_fetch: true
       jakarta.persistence.validation.mode: none
 
+  rabbitmq:
+    addresses: localhost:5672
+    virtual-host: /
+    ssl:
+      enabled: false
+      algorithm: TLSv1.2
+      verify-hostname: true
+      key-store: file:${RABBITMQ_SSL_KEYSTORE_LOCATION}
+      key-store-password: ${RABBITMQ_SSL_KEYSTORE_PASSWORD}
+      trust-store: file:${TRUSTSTORE_LOCATION}
+      trust-store-password: ${TRUSTSTORE_PASSWORD}
+
+  cloud:
+    stream:
+      bindings:
+        orderCreatedProducer-out-0:
+          destination: evt.order.created
+      output-bindings: orderCreatedProducer
+
 springdoc:
-  #  api-docs: # TODO remove?
-  #    enabled: true
   swagger-ui:
     enabled: true
     tags-sorter: alpha

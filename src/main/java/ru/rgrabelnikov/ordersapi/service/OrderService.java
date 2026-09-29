@@ -1,17 +1,16 @@
 package ru.rgrabelnikov.ordersapi.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ru.rgrabelnikov.ordersapi.dto.OrderCreateRq;
-import ru.rgrabelnikov.ordersapi.dto.OrderRs;
-import ru.rgrabelnikov.ordersapi.dto.PageRs;
+import ru.rgrabelnikov.ordersapi.domain.OrderEntity;
 
 import java.util.UUID;
 
 public interface OrderService {
 
-    OrderRs create(OrderCreateRq request);
+    OrderEntity create(OrderEntity order);
 
-    OrderRs getById(UUID id);
+    OrderEntity getById(UUID id);
 
-    PageRs<OrderRs> getAll(Pageable pageable);
+    Page<OrderEntity> getAll(Pageable pageable);
 }

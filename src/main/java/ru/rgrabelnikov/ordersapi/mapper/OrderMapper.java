@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 import ru.rgrabelnikov.ordersapi.domain.OrderEntity;
 import ru.rgrabelnikov.ordersapi.dto.OrderCreateRq;
+import ru.rgrabelnikov.ordersapi.dto.OrderCreatedEvent;
 import ru.rgrabelnikov.ordersapi.dto.OrderRs;
 import ru.rgrabelnikov.ordersapi.dto.PageRs;
 
@@ -35,4 +36,6 @@ public interface OrderMapper {
                 page.isLast()
         );
     }
+
+    OrderCreatedEvent toCreatedEvent(OrderEntity order);
 }
