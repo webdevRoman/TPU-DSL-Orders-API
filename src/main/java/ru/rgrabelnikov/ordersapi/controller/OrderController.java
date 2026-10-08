@@ -2,6 +2,7 @@ package ru.rgrabelnikov.ordersapi.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +55,8 @@ public class OrderController {
 
     @GetMapping
     public PageRs<OrderRs> getAll(
-            @PageableDefault(size = 20, sort = "createdAt,desc") final Pageable pageable
+            @PageableDefault(size = 20, sort = "createdAt,desc")
+            @ParameterObject final Pageable pageable
     ) {
         final Page<OrderEntity> orders = orderService.getAll(pageable);
         return mapper.toPageRs(orders);

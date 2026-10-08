@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: Orders-API
+    name: orders-api
   web:
     error:
       include-message: always

@@ -22,7 +22,7 @@ ext {
     set('springCloudVersion', "2025.1.3")
 }
 
-def springdocOpenapiStarterWebmvcUiVersion = '3.1.0'
+def springdocOpenapiStarterWebmvcUiVersion = '3.1.1'
 def mapstructVersion = '1.6.3'
 def lombokMapstructBindingVersion = '0.2.0'
 
