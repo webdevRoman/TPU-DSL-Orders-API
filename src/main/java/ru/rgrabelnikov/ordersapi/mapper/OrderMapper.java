@@ -7,8 +7,10 @@ import ru.rgrabelnikov.ordersapi.domain.OrderEntity;
 import ru.rgrabelnikov.ordersapi.dto.OrderCreateRq;
 import ru.rgrabelnikov.ordersapi.dto.OrderCreatedEvent;
 import ru.rgrabelnikov.ordersapi.dto.OrderRs;
+import ru.rgrabelnikov.ordersapi.dto.OrderStatsRs;
 import ru.rgrabelnikov.ordersapi.dto.PageRs;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Mapper
@@ -38,4 +40,6 @@ public interface OrderMapper {
     }
 
     OrderCreatedEvent toCreatedEvent(OrderEntity order);
+
+    OrderStatsRs toStatsRs(Long ordersNew, Long ordersProcessing, Long ordersDone, OffsetDateTime lastProcessedAt);
 }

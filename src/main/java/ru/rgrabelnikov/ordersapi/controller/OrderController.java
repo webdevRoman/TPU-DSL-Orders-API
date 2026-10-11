@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/orders")
+@RequestMapping("/api/orders-api/orders")
 public class OrderController {
 
     private final OrderService orderService;
