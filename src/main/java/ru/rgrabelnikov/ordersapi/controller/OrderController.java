@@ -21,6 +21,7 @@ import ru.rgrabelnikov.ordersapi.dto.OrderRs;
 import ru.rgrabelnikov.ordersapi.dto.PageRs;
 import ru.rgrabelnikov.ordersapi.mapper.OrderMapper;
 import ru.rgrabelnikov.ordersapi.service.EventSenderService;
+import ru.rgrabelnikov.ordersapi.service.MetricsService;
 import ru.rgrabelnikov.ordersapi.service.OrderService;
 
 import java.util.UUID;
@@ -32,33 +33,46 @@ public class OrderController {
 
     private final OrderService orderService;
     private final EventSenderService eventSenderService;
+    private final MetricsService metricsService;
 
     private final OrderMapper mapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderRs create(@Valid @RequestBody final OrderCreateRq request) {
-        final OrderEntity order = mapper.toEntity(request);
-        final OrderEntity savedOrder = orderService.create(order);
+    public OrderRs create(@Valid @RequestBody final OrderCreateRq request) throws Exception {
+        return metricsService.recordRequestTimer(() -> {
+            final OrderEntity order = mapper.toEntity(request);
+            final OrderEntity savedOrder = orderService.create(order);
 
-        final OrderCreatedEvent event = mapper.toCreatedEvent(savedOrder);
-        eventSenderService.send(event);
+            final OrderCreatedEvent event = mapper.toCreatedEvent(savedOrder);
+            eventSenderService.send(event);
 
-        return mapper.toRs(savedOrder);
+            metricsService.incrementRequestsTotalCounter(HttpStatus.CREATED);
+            metricsService.incrementOrdersCreatedCounter();
+            return mapper.toRs(savedOrder);
+        });
     }
 
     @GetMapping("/{id}")
-    public OrderRs getById(@PathVariable final UUID id) {
-        final OrderEntity order = orderService.getById(id);
-        return mapper.toRs(order);
+    public OrderRs getById(@PathVariable final UUID id) throws Exception {
+        return metricsService.recordRequestTimer(() -> {
+            final OrderEntity order = orderService.getById(id);
+            metricsService.incrementRequestsTotalCounter(HttpStatus.OK);
+            return mapper.toRs(order);
+        });
     }
 
     @GetMapping
     public PageRs<OrderRs> getAll(
             @PageableDefault(size = 20, sort = "createdAt,desc")
             @ParameterObject final Pageable pageable
-    ) {
-        final Page<OrderEntity> orders = orderService.getAll(pageable);
-        return mapper.toPageRs(orders);
+    ) throws Exception {
+        return metricsService.recordRequestTimer(() -> {
+            Thread.sleep(1000L);
+
+            final Page<OrderEntity> orders = orderService.getAll(pageable);
+            metricsService.incrementRequestsTotalCounter(HttpStatus.OK);
+            return mapper.toPageRs(orders);
+        });
     }
 }
