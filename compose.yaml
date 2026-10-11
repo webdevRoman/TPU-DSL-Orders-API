@@ -1,6 +1,7 @@
 name: dso-orders
 
 services:
+
   postgres:
     image: postgres:18.3-alpine
     container_name: dso-orders-postgres
@@ -9,4 +10,11 @@ services:
       - 'POSTGRES_PASSWORD=postgres'
       - 'POSTGRES_USER=postgres'
     ports:
-      - '5432'
+      - "5433:5432"
+
+  rabbitmq:
+    image: rabbitmq:4.3.6-management-alpine
+    container_name: dso-orders-rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
