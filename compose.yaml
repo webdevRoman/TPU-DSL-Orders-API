@@ -89,10 +89,9 @@ services:
       - "9100:9100"
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    image: ghcr.io/google/cadvisor:v0.60.6
     container_name: dso-orders-cadvisor
     privileged: true
-    #    pid: host
     devices:
       - /dev/kmsg
     volumes:

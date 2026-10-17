@@ -46,10 +46,9 @@ public class DefaultMetricsService implements MetricsService {
         final HttpServletRequest rq = requireNonNull((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         return Timer.builder("http.request.duration.seconds")
                 .description("Распределение времени ответа")
-                .publishPercentiles(0.5, 0.95, 0.99)
                 .publishPercentileHistogram()
                 .tags("method", rq.getMethod())
-                .tags("route,", rq.getRequestURI())
+                .tags("route", rq.getRequestURI())
                 .register(meterRegistry)
                 .recordCallable(action);
     }
