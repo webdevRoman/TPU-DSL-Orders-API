@@ -2,6 +2,8 @@ name: dso-orders
 
 services:
 
+  # --- Infrastructure ---
+
   postgres:
     image: postgres:18.3-alpine
     container_name: dso-orders-postgres
@@ -17,4 +19,120 @@ services:
     container_name: dso-orders-rabbit
     ports:
       - "5672:5672"
-      - "15672:15672"
+      - "15672:15672" # UI
+      - "15692:15692" # metrics plugin (rabbitmq_prometheus)
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+
+  # --- Services ---
+
+  orders-api:
+    image: orders-api:1.0.1
+    container_name: dso-orders-api
+    environment:
+      - 'JDBC_URL=jdbc:postgresql://postgres:5432/orders_db'
+      - 'RABBITMQ_URL=rabbitmq:5672'
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  orders-worker:
+    image: orders-worker:1.0.1
+    container_name: dso-orders-worker
+    environment:
+      - 'JDBC_URL=jdbc:postgresql://postgres:5432/orders_db'
+      - 'RABBITMQ_URL=rabbitmq:5672'
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - orders-api
+
+  # --- Exporters ---
+
+  orders-metrics-exporter:
+    image: orders-metrics-exporter:1.0.1
+    container_name: dso-orders-metrics-exporter
+    environment:
+      - 'ORDERS_API_INTERNAL_STATS_URL=http://orders-api:8081/internal/stats'
+    ports:
+      - "8083:8083"
+    depends_on:
+      - orders-api
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    container_name: dso-orders-postgres-exporter
+    environment:
+      - 'DATA_SOURCE_NAME=postgresql://postgres:postgres@postgres:5432/orders_db?sslmode=disable'
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+
+  node-exporter:
+    image: prom/node-exporter:v1.12.1
+    container_name: dso-orders-node-exporter
+    volumes:
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: dso-orders-cadvisor
+    privileged: true
+    #    pid: host
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8088:8080"
+
+  # --- Observability ---
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    container_name: dso-orders-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=2h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - victoriametrics
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.153.0
+    container_name: dso-orders-victoriametrics
+    command:
+      - '--storageDataPath=/storage'
+      - '--httpListenAddr=:8428'
+      - '--retentionPeriod=30'
+    volumes:
+      - victoriametrics-data:/storage
+    ports:
+      - "8428:8428"
+
+volumes:
+  prometheus-data:
+  victoriametrics-data:

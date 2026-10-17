@@ -1,0 +1,80 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Долгое хранение: Prometheus пишет все собранные метрики в VictoriaMetrics
+remote_write:
+  - url: http://victoriametrics:8428/api/v1/write
+    queue_config:
+      max_samples_per_send: 10000
+
+scrape_configs:
+
+  # Orders-API (Spring Boot приложение)
+  - job_name: orders-api
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'orders-api:8081' ]
+        labels:
+          application: orders-api
+          instance: dso-orders-api
+
+  # Orders-Worker (Spring Boot приложение)
+  - job_name: orders-worker
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'orders-worker:8082' ]
+        labels:
+          application: orders-worker
+          instance: dso-orders-worker
+
+  # Orders-Metrics-Exporter (Spring Boot приложение)
+  - job_name: orders-metrics-exporter
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: [ 'orders-metrics-exporter:8083' ]
+        labels:
+          application: orders-metrics-exporter
+          instance: dso-orders-metrics-exporter
+
+  # RabbitMQ (плагин rabbitmq_prometheus)
+  - job_name: rabbitmq
+    static_configs:
+      - targets: [ 'rabbitmq:15692' ]
+        labels:
+          application: rabbitmq
+
+  # Postgres (postgres-exporter)
+  - job_name: postgres
+    static_configs:
+      - targets: [ 'postgres-exporter:9187' ]
+        labels:
+          application: postgres
+
+  # Метрики контейнеров (cAdvisor)
+  - job_name: cadvisor
+    static_configs:
+      - targets: [ 'cadvisor:8080' ]
+        labels:
+          application: cadvisor
+
+  # Метрики ноды (CPU, RAM, диск, сеть)
+  - job_name: node
+    static_configs:
+      - targets: [ 'node-exporter:9100' ]
+        labels:
+          application: node
+
+  # Сам Prometheus
+  - job_name: prometheus
+    static_configs:
+      - targets: [ 'localhost:9090' ]
+        labels:
+          application: prometheus
+
+  # VictoriaMetrics (долгое хранение)
+  - job_name: victoriametrics
+    static_configs:
+      - targets: [ 'victoriametrics:8428' ]
+        labels:
+          application: victoriametrics
